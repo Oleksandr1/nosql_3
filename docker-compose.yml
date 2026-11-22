@@ -1,0 +1,26 @@
+services:
+  neo4j:
+    image: neo4j:5.18-community
+    container_name: neo4j_movielens
+    ports:
+      - "7474:7474"   # Neo4j Browser
+      - "7687:7687"   # Bolt (cypher-shell, драйвери)
+    environment:
+      NEO4J_AUTH: neo4j/password123
+      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*"
+      # У Neo4j 5 налаштування пам'яті називаються server.memory.* (dbms.memory.* — з 4.x).
+      # 4G heap — з запасом під GDS-проєкції; на машині з 8 ГБ RAM зменшіть до 2G.
+      NEO4J_server_memory_heap_initial__size: "1G"
+      NEO4J_server_memory_heap_max__size: "4G"
+      NEO4J_server_memory_pagecache_size: "1G"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./import:/var/lib/neo4j/import
+      - ./queries:/queries:ro    # щоб запускати .cypher через cypher-shell всередині контейнера
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
